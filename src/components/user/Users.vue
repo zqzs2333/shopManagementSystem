@@ -18,30 +18,30 @@
         </el-col>
       </el-row>
       <el-table
-        stripe
-        :data="users">
-        <el-table-column
-          type="index">
-        </el-table-column>
-        <el-table-column
-          prop="username"
-          label="用户名">
-        </el-table-column>
-        <el-table-column
-          prop="role_name"
-          label="角色">
-        </el-table-column>
-        <el-table-column
-          prop="email"
-          label="邮箱">
-        </el-table-column>
-        <el-table-column
-          prop="mobile"
-          label="手机号">
-        </el-table-column>
-        <el-table-column
-          prop="mg_state"
-          label="状态">
+          stripe
+          :data="users">
+          <el-table-column
+            type="index">
+          </el-table-column>
+          <el-table-column
+            prop="username"
+            label="用户名">
+          </el-table-column>
+          <el-table-column
+            prop="role_name"
+            label="角色">
+          </el-table-column>
+          <el-table-column
+            prop="email"
+            label="邮箱">
+          </el-table-column>
+          <el-table-column
+            prop="mobile"
+            label="手机号">
+          </el-table-column>
+          <el-table-column
+            prop="mg_state"
+            label="状态">
           <!--          作用域插槽 -->
           <template slot-scope="scope">
             <el-switch
@@ -63,7 +63,7 @@
               <el-button size="mini" type="danger" icon="el-icon-delete" @click="showDeleteDialog(scope.row.id)"></el-button>
             </el-tooltip>
             <el-tooltip :enterable="false" effect="dark" content="分配角色" placement="top">
-              <el-button size="mini" type="warning" icon="el-icon-setting"></el-button>
+              <el-button @click="setRole(scope.row)" size="mini" type="warning" icon="el-icon-setting"></el-button>
             </el-tooltip>
           </template>
         </el-table-column>
@@ -144,6 +144,31 @@
     <el-button type="primary" @click="checkDeleteUser">确 定</el-button>
   </span>
     </el-dialog>
+<!--    分配角色-->
+    <el-dialog
+      title="分配角色"
+      :visible.sync="setRoleDialogVisible"
+      width="50%"
+    >
+      <div>
+        <p>当前的用户:{{userInfo.username}}</p>
+        <p>当前的角色:{{userInfo.role_name}}</p>
+        <p>分配新角色:
+          <el-select v-model="selectedID" placeholder="请选择">
+            <el-option
+              v-for="item in rolesList"
+              :key="item.id"
+              :label="item.roleName"
+              :value="item.id">
+            </el-option>
+          </el-select>
+        </p>
+      </div>
+      <span slot="footer" class="dialog-footer">
+    <el-button @click="setRoleDialogVisible = false">取 消</el-button>
+    <el-button type="primary" @click="saveRoleInfo">确 定</el-button>
+  </span>
+    </el-dialog>
 
   </div>
 </template>
@@ -205,7 +230,11 @@
       addDialogVisble: false,
       editDialogVisble: false,
       deleteDialogVisble: false,
-      deleteId: 0
+      setRoleDialogVisible: false,
+      userInfo: {},
+      deleteId: 0,
+      rolesList: [],
+      selectedID: {}
     }
   },
   created() {
@@ -293,6 +322,28 @@
       this.$message.success('删除用户成功！')
       this.deleteDialogVisble = false
       this.getUserList()
+    },
+    async setRole(userInfo) {
+      this.userInfo = userInfo
+      const { data: res } = await this.$http.get(`roles`)
+      if (res.meta.status !== 200) {
+        this.$message.error('获取角色列表失败')
+        return
+      }
+      this.rolesList = res.data
+      this.setRoleDialogVisible = true
+    },
+    async saveRoleInfo() {
+      if (!this.selectedID) {
+        return this.$message.error('请选择角色！')
+      }
+      const { data: res } = await this.$http.put(`users/${this.userInfo.id}/role`, { rid: this.selectedID })
+      if (res.meta.status !== 200) {
+        return this.$message.error('更新用户角色失败')
+      }
+      this.$message.success('更新用户角色成功')
+      this.getUserList()
+      this.setRoleDialogVisible = false
     }
   }
 }
