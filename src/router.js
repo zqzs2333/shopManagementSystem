@@ -8,6 +8,8 @@ import Rights from './components/power/Rights'
 import Roles from './components/power/Roles'
 import Categories from './components/goods/Categories'
 import Params from './components/goods/Params'
+import List from './components/goods/List'
+import add from './components/goods/add'
 
 Vue.use(Router)
 
@@ -21,7 +23,8 @@ const router = new Router({
       redirect: '/welcome',
       children: [{ path: '/welcome', component: Welcome },
         { path: '/users', component: Users }, { path: '/Rights', component: Rights }, { path: '/Roles', component: Roles },
-        { path: '/categories', component: Categories }, { path: '/params', component: Params }]
+        { path: '/categories', component: Categories }, { path: '/params', component: Params },
+        { path: '/goods', component: List }, { path: '/goods/add', component: add }]
     }
   ]
 })
